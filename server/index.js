@@ -3,7 +3,7 @@ const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { google } = require('googleapis');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') }); // Carregar o .env certo
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -12,17 +12,18 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Servir todos os arquivos estáticos corretamente
-app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
-app.use('/bootstrap', express.static(path.join(__dirname, '..', 'bootstrap')));
-app.use('/pages', express.static(path.join(__dirname, '..', 'pages')));
+// 🛠️ Configurar o caminho correto para servir os arquivos estáticos que estão fora do /server
+const publicPath = path.join(__dirname, '..'); // Sobe uma pasta para acessar a raiz
 
-// Servir o index.html diretamente da raiz
-app.use(express.static(path.join(__dirname, '..')));
+app.use('/assets', express.static(path.join(publicPath, 'assets')));
+app.use('/bootstrap', express.static(path.join(publicPath, 'bootstrap')));
+app.use('/pages', express.static(path.join(publicPath, 'pages')));
+app.use('/js', express.static(path.join(publicPath, 'assets', 'js'))); // Se precisar também dos JS
+app.use(express.static(publicPath)); // para o index.html e outros soltos
 
 // Página inicial (index.html)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 // OAuth2 client
